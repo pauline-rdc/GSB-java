@@ -26,12 +26,14 @@ import java.awt.Color;
 import java.awt.Font;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
  
 public class authentification extends JFrame {
 
 	public static String matricule;
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private boolean valide = false;
 	static Connection conn1;
 	static Statement stat;
 	static ResultSet resul;
@@ -43,11 +45,24 @@ public class authentification extends JFrame {
 	private JTextField textField;
 	private JButton ok;
 	private JPasswordField pass;
+	private static JComboBox reg;
+	private JLabel label;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					ConnexionBDD conn = new ConnexionBDD();
+					Statement state = (Statement) conn.execBDD().createStatement();
+				    ResultSet result = state.executeQuery("SELECT * FROM  region");
+				    resultMeta = (ResultSetMetaData) result.getMetaData();
+				    while(result.next()){
+				    	getReg().addItem(result.getString("REG_CODE")+" : "+ result.getString("REG_NOM"));
+				    }
+				    
+		            result.close();
+		       	  	state.close();
+		       	  	
 					authentification frame = new authentification();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -59,7 +74,7 @@ public class authentification extends JFrame {
 
 	public authentification() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 276);
+		setBounds(100, 100, 437, 290);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -72,12 +87,16 @@ public class authentification extends JFrame {
 		contentPane.add(getTextField_1());
 		contentPane.add(getOk());
 		contentPane.add(getPass());
+		contentPane.add(getReg());
+		contentPane.add(getLabel());
 	}
 	
 	private void validerActionPerformed(java.awt.event.ActionEvent evt) {
 		String loginn = login.getText();
         @SuppressWarnings("deprecation")
 		String passwordd = pass.getText();
+        String[] tab = connexion.selectionner.displayString(reg.getSelectedItem());
+        String regionCode = tab[0];
  
 		try {
 		
@@ -90,6 +109,7 @@ public class authentification extends JFrame {
 		if(resul.next())	
 			{	String date = resul.getString("VIS_DATEEMBAUCHE"); 
 				matricule= resul.getString("VIS_MATRICULE");
+				
 				String annee= date.substring(0,4);
 				String mois= date.substring(5,7);
 				String jour= date.substring(8,10);
@@ -111,10 +131,24 @@ public class authentification extends JFrame {
 				date=jour+mois+annee;					// nouveau format de la date 
 				String motDePasse = date;				
 				passwordd= stripAccents(passwordd); 	// on retire les accents
-					
-				if(motDePasse.equalsIgnoreCase(passwordd))	// connexion réussit
-				{	new accueil().setVisible(true);
-					this.setVisible(false);
+				
+				
+				if(motDePasse.equalsIgnoreCase(passwordd)) // vérification du mot de passe
+				{	Statement state = (Statement) conn.execBDD().createStatement();
+			    	ResultSet result = state.executeQuery("SELECT * FROM travailler where REG_CODE='"+ regionCode +"'");
+			    	resultMeta = (ResultSetMetaData) result.getMetaData();
+			    	while(result.next()){
+			    		if ( (result.getString("VIS_MATRICULE")).equals(matricule)){
+			    			valide=true;
+			    			System.out.print(" | c'est valide: "+valide);
+			    		}
+			    	}
+			    	if (valide==true){	// vérification de la région
+			    		new accueil().setVisible(true);
+						this.setVisible(false);
+			    	}else{
+			    		JOptionPane.showMessageDialog(null,"La région sélectionnée ne correspont pas à l'utilisateur ! ","Error",1);
+			    	}
 				}
 				else {
 					JOptionPane.showMessageDialog(null,"Mot de passe incorrect ! ","Error",1);
@@ -131,7 +165,7 @@ public class authentification extends JFrame {
 	private JTextField getLogin() {
 		if (login == null) {
 			login = new JTextField();
-			login.setBounds(145, 82, 116, 22);
+			login.setBounds(155, 79, 116, 22);
 			login.setColumns(10);
 		}
 		return login;
@@ -143,7 +177,7 @@ public class authentification extends JFrame {
 	private JLabel getLblLogin() {
 		if (lblLogin == null) {
 			lblLogin = new JLabel("login : ");
-			lblLogin.setBounds(89, 85, 56, 16);
+			lblLogin.setBounds(99, 82, 56, 16);
 		}
 		return lblLogin;
 	}
@@ -152,7 +186,7 @@ public class authentification extends JFrame {
 	private JLabel getLblMotDePass() {
 		if (lblMotDePass == null) {
 			lblMotDePass = new JLabel("mot de passe : ");
-			lblMotDePass.setBounds(43, 120, 104, 16);
+			lblMotDePass.setBounds(53, 117, 104, 16);
 		}
 		return lblMotDePass;
 	}
@@ -177,7 +211,7 @@ public class authentification extends JFrame {
 			textField.setFont(new Font("Tahoma", Font.BOLD, 16));
 			textField.setColumns(10);
 			textField.setBackground(new Color(100, 149, 237));
-			textField.setBounds(0, 197, 432, 58);
+			textField.setBounds(0, 208, 432, 47);
 		}
 		return textField;
 	}
@@ -192,15 +226,29 @@ public class authentification extends JFrame {
 		                validerActionPerformed(evt);
 				}
 			});
-			ok.setBounds(272, 152, 116, 25);
+			ok.setBounds(291, 180, 116, 25);
 		}
 		return ok;
 	}
 	private JPasswordField getPass() {
 		if (pass == null) {
 			pass = new JPasswordField();
-			pass.setBounds(145, 117, 116, 22);
+			pass.setBounds(155, 114, 116, 22);
 		}
 		return pass;
+	}
+	private static JComboBox getReg() {
+		if (reg == null) {
+			reg = new JComboBox();
+			reg.setBounds(101, 151, 232, 22);
+		}
+		return reg;
+	}
+	private JLabel getLabel() {
+		if (label == null) {
+			label = new JLabel("Région : ");
+			label.setBounds(30, 152, 104, 16);
+		}
+		return label;
 	}
 }
