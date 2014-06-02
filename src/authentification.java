@@ -31,6 +31,8 @@ import javax.swing.JComboBox;
 public class authentification extends JFrame {
 
 	public static String matricule;
+	public static int numPraticien;
+	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private boolean valide = false;

@@ -172,8 +172,7 @@ public class rapport_visite extends accueil {
 			detail = new JButton("Détails");
 			detail.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					new praticiens().setVisible(true);
-					setVisible(false);
+					new praticien().setVisible(true);
 				}
 			});
 			detail.setBounds(332, 132, 97, 25);
@@ -317,7 +316,7 @@ public class rapport_visite extends accueil {
 								
 								  rapNum= result1.getInt("RAP_NUM");
 								  System.out.println(" | RAP_num: " + numRap +" | ");
-								  
+								 
 								  getRapport().setText(result1.getString("RAP_NUM"));
 								  getDate().setText(result1.getString("RAP_DATE"));
 								  getBilan2().setText(result1.getString("RAP_BILAN"));
@@ -326,8 +325,11 @@ public class rapport_visite extends accueil {
 								  Statement state2 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
 						           result2 = state2.executeQuery("SELECT * FROM "+table2 +" where PRA_NUM='"+ result1.getString("PRA_NUM") +"'");
 						           resultM2 = (ResultSetMetaData) result2.getMetaData();
+						           
 						           while(result2.next()){	
 						        	   getPraticien().setText(result2.getString("PRA_NOM"));
+						        	   numPraticien=result2.getInt("PRA_NUM");
+						        	   System.out.println("| numPraticien" +numPraticien + " |"); 
 						           }
 						           
 						           Statement state3 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
@@ -430,15 +432,12 @@ public class rapport_visite extends accueil {
 						 while(result2.next()){	
 							 if (valid==true){
 								 numSuivant=result2.getInt("RAP_NUM");
-								 System.out.println(" | NumSuivant :" +numSuivant +"  || "+ rapNum);
 								 valid=false;
 							 }
 							 if(result2.getInt("RAP_NUM") == rapNum){
-								 System.out.println(" | si rap_num=RAP_num: " + rapNum +" | ");
 								 valid=true;
 							 }
 						 }
-						 System.out.println(" | Après le while: " + rapNum +" | ");
 						if (numSuivant!=0){
 							rapNum=numSuivant;
 						}
@@ -473,6 +472,7 @@ public class rapport_visite extends accueil {
 			           ResultSet result5 = state2.executeQuery("SELECT * FROM "+table2 +" where PRA_NUM='"+ result4.getString("PRA_NUM") +"'");
 			           ResultSetMetaData resultM5 = (ResultSetMetaData) result5.getMetaData();
 			           while(result5.next()){	
+			        	   numPraticien=result5.getInt("PRA_NUM");
 			        	   getPraticien().setText(result5.getString("PRA_NOM"));
 			           }
 			           

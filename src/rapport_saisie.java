@@ -96,6 +96,7 @@ public class rapport_saisie extends accueil {
 	private JComboBox combo_motif;
 	private JTextField autre_motif;
 	public boolean validate =true;
+	private JButton detail;
 
 	/**
 	 * Launch the application.
@@ -176,6 +177,7 @@ public class rapport_saisie extends accueil {
 			panel.add(getPan());
 			panel.add(getCombo_motif());
 			panel.add(getTextField_1_1());
+			panel.add(getDetail());
 			
 		}
 		return panel;
@@ -188,7 +190,7 @@ public class rapport_saisie extends accueil {
 			titre.setFont(new Font("Tahoma", Font.BOLD, 16));
 			titre.setColumns(10);
 			titre.setBackground(new Color(100, 149, 237));
-			titre.setBounds(0, 0, 515, 58);
+			titre.setBounds(0, 0, 521, 58);
 			titre.setEditable(false);
 		}
 		return titre;
@@ -493,5 +495,36 @@ public class rapport_saisie extends accueil {
 			autre_motif.setColumns(10);
 		}
 		return autre_motif;
+	}
+	private JButton getDetail() {
+		if (detail == null) {
+			detail = new JButton("Détail");
+			detail.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					try {
+						ConnexionBDD conn = new ConnexionBDD();
+						tab = connexion.selectionner.displayString(praticien.getSelectedItem());
+						Statement state2;
+						state2 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						result = state2.executeQuery("SELECT * FROM praticien where PRA_NOM='"+tab[0]+"' and PRA_PRENOM='"+ tab[1] +"'");
+					    resultMeta = (ResultSetMetaData) result.getMetaData();	
+							while(result.next()){	
+								numPraticien = result.getInt("PRA_NUM");
+								System.out.println(numPra);
+							}
+						new praticien().setVisible(true);
+							
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}	
+
+				}
+			});
+			detail.setMnemonic(KeyEvent.VK_ENTER);
+			detail.setBounds(350, 71, 97, 25);
+		}
+		return detail;
 	}
 }
