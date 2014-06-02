@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.SystemColor;
+import javax.swing.JRadioButton;
 public class rapport_saisie extends accueil {
 
 	/**
@@ -97,6 +98,7 @@ public class rapport_saisie extends accueil {
 	private JTextField autre_motif;
 	public boolean validate =true;
 	private JButton detail;
+	private JRadioButton autreMotif;
 
 	/**
 	 * Launch the application.
@@ -124,7 +126,8 @@ public class rapport_saisie extends accueil {
 					table = "praticien";
 					table2="rapport_visite"; 
 					table3="medicament";
-				    
+					autre_motif.setEnabled(false);
+					combo_motif.setEnabled(true);
 					ConnexionBDD conn = new ConnexionBDD();						
 					
 					Statement state = (Statement) conn.execBDD().createStatement();
@@ -137,14 +140,19 @@ public class rapport_saisie extends accueil {
 		            result.close();
 		       	  	state.close();		
 		       	  	
-		       	  	
-					getCombo_motif().addItem("Périodicité");
+		       	  	ConnexionBDD conn2 = new ConnexionBDD();						
+					
+					Statement state2 = (Statement) conn2.execBDD().createStatement();
+				    ResultSet result2 = state2.executeQuery("SELECT * FROM motif order by MOTIF");
+				    ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+				    while(result2.next()){
+				    	getCombo_motif().addItem(result2.getString("MOTIF"));
+				    }
+					/*getCombo_motif().addItem("Périodicité");
 					getCombo_motif().addItem("Actualisation");
 				    getCombo_motif().addItem("Relance");
 				    getCombo_motif().addItem("Solicitation praticien");
-				    getCombo_motif().addItem("Autre");
-					
-					
+				    getCombo_motif().addItem("Autre");*/
 				} catch (Exception s) {
 					s.printStackTrace();
 				}
@@ -178,6 +186,7 @@ public class rapport_saisie extends accueil {
 			panel.add(getCombo_motif());
 			panel.add(getTextField_1_1());
 			panel.add(getDetail());
+			panel.add(getAutreMotif());
 			
 		}
 		return panel;
@@ -290,9 +299,9 @@ public class rapport_saisie extends accueil {
 	
 	private void beforeValidate() throws SQLException{
 		// Motif
-		if (( autre_motif.getText().length() != 0  )&&( motif_combo == "Autre" )){
+		if (( autre_motif.getText().length() != 0  )&&(autreMotif.isSelected())){
 			motif_combo =autre_motif.getText();
-		}else if ((autre_motif.getText().length() == 0)&&( motif_combo == "Autre" )){
+		}else if ((autre_motif.getText().length() == 0)&&(autreMotif.isSelected())){
 			JOptionPane.showMessageDialog(null,"Il faut entré un motif dans le champs correspondant ");
 			validate=false;
 		}
@@ -356,12 +365,22 @@ public class rapport_saisie extends accueil {
 							+ nbEchant +"')");
 				}
 				
+				System.out.println(autreMotif.isSelected() +"|"+ motif_combo);
+				// insertion du nouveau motif dans la table motif
+				if (autreMotif.isSelected()){
+					//insertion des informations du rapport
+					ConnexionBDD conn2 = new ConnexionBDD();// Connexion
+					Statement stat = (Statement) conn2.execBDD().createStatement();
+					result1 = stat.executeUpdate("INSERT INTO motif VALUES('"+motif_combo+"')");
+				}
+				
 				setVisible(false);
 				new rapport_visite().setVisible(true);
 	        }
         }
         catch (SQLException s){
             System.out.println("SQL code does not execute.");
+            s.printStackTrace();
             JOptionPane.showMessageDialog(null,"Problème lors de l'enregistrement ! ");
         } 
 	}
@@ -381,7 +400,7 @@ public class rapport_saisie extends accueil {
 			plus = new JButton("+");
 			plus.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-						//Lorsque nous cliquons sur notre bouton, on passe a l'autre fenêtre
+						//Lorsque nous cliquons sur notre bouton, on passe à l'autre fenêtre
 					if(arg0.getSource() == plus){
 						if (hauteur_btn_plus<=449){		//changement de position du bouton et/ou agrandissement du panel
 						hauteur_btn_plus= hauteur_btn_plus+30;	
@@ -473,25 +492,22 @@ public class rapport_saisie extends accueil {
 			combo_motif.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					motif_combo= (String) combo_motif.getSelectedItem();
-					
-					System.out.println("|"+motif_combo+"|");
-					
-					if (motif_combo=="Autre"){
+					/*if (motif_combo=="Autre"){
 						autre_motif.setEnabled(true);
 					}else
 					{	autre_motif.setEnabled(false);
 					}
-					System.out.println();
+					System.out.println();*/
 				}
 			});
-			combo_motif.setBounds(155, 130, 116, 22);
+			combo_motif.setBounds(155, 130, 126, 22);
 		}
 		return combo_motif;
 	}
 	private JTextField getTextField_1_1() {
 		if (autre_motif == null) {
 			autre_motif = new JTextField();
-			autre_motif.setBounds(280, 130, 116, 22);
+			autre_motif.setBounds(373, 130, 116, 22);
 			autre_motif.setColumns(10);
 		}
 		return autre_motif;
@@ -526,5 +542,24 @@ public class rapport_saisie extends accueil {
 			detail.setBounds(350, 71, 97, 25);
 		}
 		return detail;
+	}
+	private JRadioButton getAutreMotif() {
+		if (autreMotif == null) {
+			autreMotif = new JRadioButton("Autre :");
+			autreMotif.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					if (autreMotif.isSelected()){
+						autre_motif.setEnabled(true);
+						combo_motif.setEnabled(false);
+					}else {
+						autre_motif.setEnabled(false);
+						combo_motif.setEnabled(true);
+					}
+				}
+			});
+			autreMotif.setBackground(Color.WHITE);
+			autreMotif.setBounds(298, 129, 69, 25);
+		}
+		return autreMotif;
 	}
 }
