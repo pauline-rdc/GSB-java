@@ -18,13 +18,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JComboBox;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.ResultSetMetaData;
 import com.mysql.jdbc.Statement;
+
 import javax.swing.JTextPane;
+
 import java.awt.SystemColor;
 
 public class visiteur extends accueil {
@@ -60,6 +63,8 @@ public class visiteur extends accueil {
 	static ResultSet result3;
 	static ResultSetMetaData resultMeta3;
 	
+	static int numSuivant;
+	static int numPrecedent;
 	static int idVis;
 	static String table;
 	static String table2;
@@ -89,7 +94,7 @@ public class visiteur extends accueil {
 					ConnexionBDD conn = new ConnexionBDD();
 					Statement stat = (Statement) conn.execBDD().createStatement();
 
-				    resul = stat.executeQuery("SELECT * FROM "+ table);
+				    resul = stat.executeQuery("SELECT * FROM "+ table+" Order by Vis_NOM");
 				    resultMe = (ResultSetMetaData) resul.getMetaData();
 				    while(resul.next()){
 				    	getChercheNom().addItem(resul.getString("VIS_NOM")+" "+resul.getString("VIS_PRENOM"));
@@ -225,10 +230,30 @@ public class visiteur extends accueil {
 			precedent = new JButton("Pr\u00E9c\u00E9dent");
 			precedent.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if (idVis!= 1){
-						idVis=idVis-1;
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM visiteur Order by VIS_NOM DESC");
+						 resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numPrecedent=result2.getInt("id");
+								 valid=false;
+							 }
+							 if(result2.getInt("id") == idVis){
+								 valid=true;
+							 }
+						 }
+						if (numPrecedent!=0){
+							idVis=numPrecedent;
+						}
+						PrecSuivantActionPerformed(e);
+						
+					} catch (SQLException e1) {
+						e1.printStackTrace();
 					}
-					PrecSuivantActionPerformed(e);
 				}
 			});
 			precedent.setBounds(30, 348, 97, 29);
@@ -240,10 +265,30 @@ public class visiteur extends accueil {
 			suivant = new JButton("Suivant");
 			suivant.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					if (idVis!= 51){
-						idVis=idVis+1;
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM visiteur Order by VIS_NOM");
+						 resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numSuivant=result2.getInt("id");
+								 valid=false;
+							 }
+							 if(result2.getInt("id") == idVis){
+								 valid=true;
+							 }
+						 }
+						if (numSuivant!=0){
+							idVis=numSuivant;
+						}
+						PrecSuivantActionPerformed(arg0);
+						
+					} catch (SQLException e1) {
+						e1.printStackTrace();
 					}
-					PrecSuivantActionPerformed(arg0);
 				}
 			});
 			suivant.setBounds(148, 348, 97, 29);

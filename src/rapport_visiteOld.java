@@ -67,6 +67,8 @@ public class rapport_visiteOld extends accueil {
 	static String table3;
 	static String echant;
 	static int numRap;
+	static int numSuivant;
+	static int numPrecedent;
 	
 	private static JComboBox<String> chercheNom;
 	private JButton ok;
@@ -183,10 +185,31 @@ public class rapport_visiteOld extends accueil {
 			precedent = new JButton("Précédent");
 			precedent.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if(numRap!=1){
-						numRap=numRap-1;
-					}
-					PrecSuivantActionPerformed();
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM rapport_visite Order by RAP_NUM");
+						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numPrecedent=result2.getInt("RAP_NUM");
+								 valid=false;
+							 }
+							 if(result2.getInt("RAP_NUM") == numRap ){
+								 valid=true;
+							 }
+						 }
+						if (numPrecedent!=0){
+							numRap=numPrecedent;
+						}
+						PrecSuivantActionPerformed();
+						
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}					
+					
 				}
 			});
 			precedent.setBounds(10, 369, 97, 25);

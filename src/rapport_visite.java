@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JTextArea;
 
@@ -63,12 +64,17 @@ public class rapport_visite extends accueil {
 	static String table3;
 	static String echant;
 	static int numRap;
+	static int numSuivant=0;
+	static int numPrecedent=0;
+	static int rapNum;
 	
 	private static JComboBox<String> chercheNom;
 	private JButton ok;
 	private JTextArea textArea_1;
 	private JTextPane bilan2;
 	private JTextPane echantillons;
+	private JButton prec;
+	private JButton suiv;
 	/**
 	 * Launch the application.
 	 */
@@ -109,6 +115,8 @@ public class rapport_visite extends accueil {
 		contentPane.add(getTextArea_1());
 		contentPane.add(getBilan2());
 		contentPane.add(getEchantillons());
+		contentPane.add(getPrec());
+		contentPane.add(getSuiv());
 		setVisible(true);
 		
 		EventQueue.invokeLater(new Runnable() {
@@ -126,6 +134,7 @@ public class rapport_visite extends accueil {
 				    resultMeta = (ResultSetMetaData) result.getMetaData();
 				    while(result.next()){
 				    	getChercheNom().addItem(result.getString("RAP_NUM"));
+				    	rapNum=result.getInt("RAP_NUM");
 				    }
 		            result.close();
 		       	  	state.close();					
@@ -135,7 +144,6 @@ public class rapport_visite extends accueil {
 			}
 		});
 	}
-
 	private JTextField getTitre() {
 		if (titre == null) {
 			titre = new JTextField();
@@ -181,7 +189,7 @@ public class rapport_visite extends accueil {
 					setVisible(false);
 				}
 			});
-			btnNew.setBounds(58, 354, 97, 25);
+			btnNew.setBounds(248, 354, 97, 25);
 		}
 		return btnNew;
 	}
@@ -306,7 +314,10 @@ public class rapport_visite extends accueil {
 						 result1 = state1.executeQuery("SELECT * FROM "+table +" where RAP_NUM='"+chercheNom.getSelectedItem()+"'");
 						 resultMeta = (ResultSetMetaData) result1.getMetaData();	
 							while(result1.next()){	
-								  numRap= result1.getInt("RAP_NUM");
+								
+								  rapNum= result1.getInt("RAP_NUM");
+								  System.out.println(" | RAP_num: " + numRap +" | ");
+								  
 								  getRapport().setText(result1.getString("RAP_NUM"));
 								  getDate().setText(result1.getString("RAP_DATE"));
 								  getBilan2().setText(result1.getString("RAP_BILAN"));
@@ -368,5 +379,119 @@ public class rapport_visite extends accueil {
 			echantillons.setEditable(false);
 		}
 		return echantillons;
+	}
+	private JButton getPrec() {
+		if (prec == null) {
+			prec = new JButton("Précédent");
+			prec.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM rapport_visite Order by RAP_NUM DESC");
+						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numPrecedent=result2.getInt("RAP_NUM");
+								 valid=false;
+							 }
+							 if(result2.getInt("RAP_NUM") == rapNum){
+								 valid=true;
+							 }
+						 }
+						if (numPrecedent!=0){
+							rapNum=numPrecedent;
+						}
+						PrecSuivantActionPerformed(arg0);
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			prec.setBounds(12, 354, 97, 25);
+		}
+		return prec;
+	}
+	private JButton getSuiv() {
+		if (suiv == null) {
+			suiv = new JButton("Suivant");
+			suiv.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM rapport_visite where VIS_MATRICULE='"+ matricule+"' Order by RAP_NUM");
+						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 System.out.println(" | Avant le while :" + rapNum);
+						 while(result2.next()){	
+							 if (valid==true){
+								 numSuivant=result2.getInt("RAP_NUM");
+								 System.out.println(" | NumSuivant :" +numSuivant +"  || "+ rapNum);
+								 valid=false;
+							 }
+							 if(result2.getInt("RAP_NUM") == rapNum){
+								 System.out.println(" | si rap_num=RAP_num: " + rapNum +" | ");
+								 valid=true;
+							 }
+						 }
+						 System.out.println(" | Après le while: " + rapNum +" | ");
+						if (numSuivant!=0){
+							rapNum=numSuivant;
+						}
+						PrecSuivantActionPerformed(e);
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			suiv.setBounds(120, 354, 97, 25);
+		}
+		return suiv;
+	}
+	private void PrecSuivantActionPerformed(java.awt.event.ActionEvent evt) {
+		try{	 
+			echant=null;
+			ConnexionBDD conn = new ConnexionBDD();
+			Statement state1 = (Statement) conn.execBDD().createStatement();
+			System.out.println(" | RAP_num du select: " + rapNum +" | ");
+			 ResultSet result4 = state1.executeQuery("SELECT * FROM rapport_visite where RAP_NUM='"+rapNum+"'");
+			 ResultSetMetaData resultMeta4 = (ResultSetMetaData) result4.getMetaData();	
+				while(result4.next()){	
+						rapNum= result4.getInt("RAP_NUM");
+						System.out.println(" | RAP_num après clic: " + rapNum +" | ");
+					  
+					  getRapport().setText(result4.getString("RAP_NUM"));
+					  getDate().setText(result4.getString("RAP_DATE"));
+					  getBilan2().setText(result4.getString("RAP_BILAN"));
+					  getMotif().setText(result4.getString("RAP_MOTIF"));
+					  
+					  Statement state2 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+			           ResultSet result5 = state2.executeQuery("SELECT * FROM "+table2 +" where PRA_NUM='"+ result4.getString("PRA_NUM") +"'");
+			           ResultSetMetaData resultM5 = (ResultSetMetaData) result5.getMetaData();
+			           while(result5.next()){	
+			        	   getPraticien().setText(result5.getString("PRA_NOM"));
+			           }
+			           
+			           Statement state3 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+			           result3 = state3.executeQuery("SELECT * FROM "+table3 +" where RAP_NUM='"+ result4.getString("RAP_NUM") +"'");
+			           resultM3 = (ResultSetMetaData) result3.getMetaData();
+			           String Newligne=System.getProperty("line.separator"); 					
+			           while(result3.next()){	
+			        	   if (echant==null){
+			        		   echant =result3.getString("MED_DEPOTLEGAL")+" : "+ result3.getString("OFF_QTE")+"";
+			        	   }else{
+			        		   echant =echant +Newligne+ result3.getString("MED_DEPOTLEGAL")+" : "+ result3.getString("OFF_QTE")+"";
+			        	   }
+			           }
+			           getEchantillons().setText(echant);
+			           System.out.println(echant); 
+				}
+		}catch(Exception e) {
+			e.printStackTrace();						
+		}
 	}
 }

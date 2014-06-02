@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JTextPane;
 
@@ -66,6 +67,8 @@ public class medicaments extends accueil {
 	static ResultSet result3;
 	static ResultSetMetaData resultM3;
 	static int idMed;
+	static int numSUIVANT=0;
+	static int numPRECEDENT=0;
 	static String table;
 	static String table2;
 	static String BD;
@@ -91,7 +94,7 @@ public class medicaments extends accueil {
 				    
 					ConnexionBDD conn = new ConnexionBDD();
 					Statement state = (Statement) conn.execBDD().createStatement();
-				    result = state.executeQuery("SELECT * FROM "+ table);
+				    result = state.executeQuery("SELECT * FROM "+ table+" Order by MED_NOMCOMMERCIAL");
 				    resultMeta = (ResultSetMetaData) result.getMetaData();
 				    while(result.next()){
 				    	getChercheMed().addItem(result.getString("MED_NOMCOMMERCIAL"));
@@ -229,10 +232,29 @@ public class medicaments extends accueil {
 			prec.setBounds(34, 491, 97, 29);
 			prec.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if ((idMed!=1)){
-						idMed=idMed-1;
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM medicament Order by MED_NOMCOMMERCIAL DESC");
+						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numSUIVANT=result2.getInt("id");
+								 valid=false;
+							 }
+							 if(result2.getInt("id") == idMed){
+								 valid=true;
+							 }
+						 }
+						if (numSUIVANT!=0){
+							idMed=numSUIVANT;
+						}
+						PrecSuivantActionPerformed(e);
+					} catch (SQLException e1) {
+						e1.printStackTrace();
 					}
-					PrecSuivantActionPerformed(e);
 				}
 			});
 		}
@@ -243,10 +265,29 @@ public class medicaments extends accueil {
 			suiv = new JButton("Suivant");
 			suiv.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if ((idMed!=28)){
-						idMed=idMed+1;
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM medicament Order by MED_NOMCOMMERCIAL");
+						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numSUIVANT=result2.getInt("id");
+								 valid=false;
+							 }
+							 if(result2.getInt("id") == idMed){
+								 valid=true;
+							 }
+						 }
+						if (numSUIVANT!=0){
+							idMed=numSUIVANT;
+						}
+						PrecSuivantActionPerformed(e);
+					} catch (SQLException e1) {
+						e1.printStackTrace();
 					}
-					PrecSuivantActionPerformed(e);
 				}
 			});
 			suiv.setBounds(152, 491, 97, 29);

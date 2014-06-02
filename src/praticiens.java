@@ -21,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import connexion.ConnexionBDD;
 
@@ -65,6 +66,8 @@ public class praticiens extends accueil {
 	private JTextField typepra;
 	private JTextField cp;
 	static int num;
+	static int numSuivant=0;
+	static int numPrecedent=0;
 	static String tab [];
 	private JTextField typepra2;
 	private JTextArea textArea_7;
@@ -234,10 +237,31 @@ public class praticiens extends accueil {
 			precedent.setBounds(26, 346, 97, 29);
 			precedent.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if (num!= 1){
-						num=num-1;
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM praticien Order by PRA_NOM DESC");
+						 resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numSuivant=result2.getInt("PRA_NUM");
+								 valid=false;
+							 }
+							 if(result2.getInt("PRA_NUM") == num){
+								 valid=true;
+							 }
+						 }
+						if (numSuivant!=0){
+							num=numSuivant;
+						}
+						PrecSuivantActionPerformed();
+						
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-					PrecSuivantActionPerformed();
 				}
 			});
 		}
@@ -248,11 +272,33 @@ public class praticiens extends accueil {
 			suivant = new JButton("Suivant");
 			suivant.setBounds(144, 346, 97, 29);
 			suivant.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (num!= 31){
-						num=num+1;
+				public void actionPerformed(ActionEvent e) {				
+					try {
+						boolean valid = false;
+						ConnexionBDD conn = new ConnexionBDD();
+						Statement state;
+						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						 result2 = state.executeQuery("SELECT * FROM praticien Order by PRA_NOM");
+						 resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 while(result2.next()){	
+							 if (valid==true){
+								 numSuivant=result2.getInt("PRA_NUM");
+								 valid=false;
+							 }
+							 if(result2.getInt("PRA_NUM") == num){
+								 valid=true;
+							 }
+						 }
+						if (numSuivant!=0){
+							num=numSuivant;
+						}
+						PrecSuivantActionPerformed();
+						
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-					PrecSuivantActionPerformed();
+				   
 				}
 			});
 		}
@@ -378,8 +424,6 @@ private void PrecSuivantActionPerformed() {
 		        	   getTypepra().setText(result2.getString("TYP_LIBELLE"));
 		        	   getTypepra2().setText(result2.getString("TYP_LIEU"));
 		           }
-		       
-		           
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -390,7 +434,7 @@ private void validerActionPerformed(String[] tab) {
 					try{
 						ConnexionBDD conn = new ConnexionBDD();
 						Statement state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
-					    result = state.executeQuery("SELECT * FROM "+table +" where PRA_NOM='"+tab[0]+"' and PRA_PRENOM='"+ tab[1] +"'");
+					    result = state.executeQuery("SELECT * FROM "+table +" where PRA_NOM='"+tab[0]+"' and PRA_PRENOM='"+ tab[1] +"' Order by PRA_NOM");
 					    resultMeta = (ResultSetMetaData) result.getMetaData();	
 
 							while(result.next()){	
