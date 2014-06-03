@@ -21,7 +21,7 @@ public class accueil extends authentification {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JButton compteRendu;
-	private static JButton visiteurs;
+	private JButton visiteurs;
 	private JButton praticiens;
 	private JButton medicaments;
 	private JButton deconnect;
@@ -33,6 +33,7 @@ public class accueil extends authentification {
 			public void run() {
 				try {
 					accueil frame = new accueil();
+					
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -43,7 +44,6 @@ public class accueil extends authentification {
 
 
 	public accueil() {
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 528, 347);
 		contentPane = new JPanel();
@@ -58,18 +58,12 @@ public class accueil extends authentification {
 		contentPane.add(getDeconnect());
 		contentPane.add(getTxtpnGestionDesComptes());
 		contentPane.add(getTextField());
-		
-		if (role.equals("Visiteur")){
-			visiteurs.setVisible(false);
-		}
-		
 		System.out.println("matricule :"); 
    	 System.out.println(matricule); 
 	}
 	private JButton getCompteRendu() {
 		if (compteRendu == null) {
 			compteRendu = new JButton("Comptes Rendus");
-			compteRendu.setBackground(new Color(255, 255, 255));
 			compteRendu.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					new rapport_visite().setVisible(true);
@@ -82,56 +76,45 @@ public class accueil extends authentification {
 	private JButton getVisiteurs() {
 		if (visiteurs == null) {
 			visiteurs = new JButton("Visiteurs");
-			visiteurs.setBackground(new Color(255, 255, 255));
-			if (role!="Visiteur"){
-				visiteurs.setVisible(true);
-			}
-			visiteurs.setVisible(true);
 			visiteurs.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					new visiteur().setVisible(true); 
 				}
 			});
-			visiteurs.setBounds(228, 212, 155, 25);
+			visiteurs.setBounds(228, 135, 155, 25);
 		}
 		return visiteurs;
 	}
 	private JButton getPraticiens() {
 		if (praticiens == null) {
 			praticiens = new JButton("Praticiens");
-			praticiens.setBackground(new Color(255, 255, 255));
 			praticiens.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					new praticiens().setVisible(true);
 				}
 			});
-			praticiens.setBounds(228, 135, 155, 25);
+			praticiens.setBounds(228, 173, 155, 25);
 		}
 		return praticiens;
 	}
 	private JButton getMedicaments() {
 		if (medicaments == null) {
 			medicaments = new JButton("Medicaments");
-			medicaments.setBackground(new Color(255, 255, 255));
 			medicaments.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					new medicaments().setVisible(true);
 				}
 			});
-			medicaments.setBounds(228, 173, 155, 25);
+			medicaments.setBounds(228, 212, 155, 25);
 		}
 		return medicaments;
 	}
 	private JButton getDeconnect() {
 		if (deconnect == null) {
-			deconnect = new JButton("Se Déconnecter");
-			deconnect.setBackground(new Color(255, 255, 255));
+			deconnect = new JButton("Quitter");
 			deconnect.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					role="";
-					matricule="";
-					new authentification().setVisible(true);
-					dispose();
+					System.exit(0);
 				}
 			});
 			deconnect.setBounds(228, 250, 155, 25);
@@ -145,7 +128,7 @@ public class accueil extends authentification {
 			txtpnGestionDesComptes.setForeground(new Color(255, 255, 255));
 			txtpnGestionDesComptes.setBackground(new Color(100, 149, 237));
 			txtpnGestionDesComptes.setText("Gestion des comptes rendus");
-			txtpnGestionDesComptes.setBounds(55, 0, 455, 62);
+			txtpnGestionDesComptes.setBounds(93, 0, 404, 62);
 			txtpnGestionDesComptes.setEditable(false);
 		}
 		return txtpnGestionDesComptes;
@@ -154,7 +137,7 @@ public class accueil extends authentification {
 		if (textField == null) {
 			textField = new JTextField();
 			textField.setBackground(new Color(100, 149, 237));
-			textField.setBounds(0, -4, 56, 306);
+			textField.setBounds(0, -4, 93, 306);
 			textField.setColumns(10);
 			textField.setEditable(false);
 		}

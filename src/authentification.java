@@ -27,13 +27,11 @@ import java.awt.Font;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import java.awt.event.ActionEvent;
  
 public class authentification extends JFrame {
 
 	public static String matricule;
 	public static int numPraticien;
-	public static String role;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -51,7 +49,6 @@ public class authentification extends JFrame {
 	private JPasswordField pass;
 	private static JComboBox reg;
 	private JLabel label;
-	private JButton quitter;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -79,19 +76,18 @@ public class authentification extends JFrame {
 
 	public authentification() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 449, 319);
+		setBounds(100, 100, 437, 290);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		contentPane.add(getLogin());
-		contentPane.add(getQuitter());
-		contentPane.add(getOk());
 		contentPane.add(getLblLogin());
 		contentPane.add(getLblMotDePass());
 		contentPane.add(getTitre());
 		contentPane.add(getTextField_1());
+		contentPane.add(getOk());
 		contentPane.add(getPass());
 		contentPane.add(getReg());
 		contentPane.add(getLabel());
@@ -105,24 +101,20 @@ public class authentification extends JFrame {
         String regionCode = tab[0];
  
 		try {
+		
 		ConnexionBDD conn = new ConnexionBDD();
 		Statement stat = (Statement) conn.execBDD().createStatement();
+		
 		ResultSet resul = stat.executeQuery("SELECT * FROM visiteur WHERE VIS_NOM ='"+loginn +"'");
 	    resultMeta = (ResultSetMetaData) resul.getMetaData();
-	    System.out.print("| regCode:"+regionCode+"|loginn:  "+ loginn);
+	    
 		if(resul.next())	
-		{	matricule= resul.getString("VIS_MATRICULE");
-			System.out.print("| matricule: "+matricule );
-			ResultSet result = stat.executeQuery("SELECT * FROM travailler WHERE VIS_MATRICULE='"+matricule +"' and REG_CODE='"+ regionCode+"'");
-		    resultMeta = (ResultSetMetaData) result.getMetaData();
-			String date = null;
-			if (result.next()){
-				role=result.getString("TRA_ROLE");
-				date=result.getString("JJMMAA");
+			{	String date = resul.getString("VIS_DATEEMBAUCHE"); 
+				matricule= resul.getString("VIS_MATRICULE");
+				
 				String annee= date.substring(0,4);
 				String mois= date.substring(5,7);
 				String jour= date.substring(8,10);
-				System.out.print("| "+ role);
 				System.out.print(date +" "+ annee+" "+ mois+" "+ jour);
 				
 				if (mois.equals("01"))	{mois = "-jan-";}
@@ -144,14 +136,25 @@ public class authentification extends JFrame {
 				
 				
 				if(motDePasse.equalsIgnoreCase(passwordd)) // vérification du mot de passe
-				{	new accueil().setVisible(true);
-					this.setVisible(false);
+				{	Statement state = (Statement) conn.execBDD().createStatement();
+			    	ResultSet result = state.executeQuery("SELECT * FROM travailler where REG_CODE='"+ regionCode +"'");
+			    	resultMeta = (ResultSetMetaData) result.getMetaData();
+			    	while(result.next()){
+			    		if ( (result.getString("VIS_MATRICULE")).equals(matricule)){
+			    			valide=true;
+			    			System.out.print(" | c'est valide: "+valide);
+			    		}
+			    	}
+			    	if (valide==true){	// vérification de la région
+			    		new accueil().setVisible(true);
+						this.setVisible(false);
+			    	}else{
+			    		JOptionPane.showMessageDialog(null,"La région sélectionnée ne correspont pas à l'utilisateur ! ","Error",1);
+			    	}
 				}
 				else {
-					JOptionPane.showMessageDialog(null,"Mot de passe ou région délectionnée incorrect ! ","Error",1);
+					JOptionPane.showMessageDialog(null,"Mot de passe incorrect ! ","Error",1);
 				}
-			}
-				
 			}
 			else {
 				JOptionPane.showMessageDialog(null,"Login incorrect ! ","Error",1);
@@ -175,8 +178,8 @@ public class authentification extends JFrame {
 	}
 	private JLabel getLblLogin() {
 		if (lblLogin == null) {
-			lblLogin = new JLabel("Nom : ");
-			lblLogin.setBounds(53, 82, 56, 16);
+			lblLogin = new JLabel("login : ");
+			lblLogin.setBounds(99, 82, 56, 16);
 		}
 		return lblLogin;
 	}
@@ -184,7 +187,7 @@ public class authentification extends JFrame {
 	
 	private JLabel getLblMotDePass() {
 		if (lblMotDePass == null) {
-			lblMotDePass = new JLabel("Mot de passe : ");
+			lblMotDePass = new JLabel("mot de passe : ");
 			lblMotDePass.setBounds(53, 117, 104, 16);
 		}
 		return lblMotDePass;
@@ -210,14 +213,13 @@ public class authentification extends JFrame {
 			textField.setFont(new Font("Tahoma", Font.BOLD, 16));
 			textField.setColumns(10);
 			textField.setBackground(new Color(100, 149, 237));
-			textField.setBounds(0, 238, 432, 47);
+			textField.setBounds(0, 208, 432, 47);
 		}
 		return textField;
 	}
 	private JButton getOk() {
 		if (ok == null) {
 			ok = new JButton("Se Connecter");
-			ok.setBackground(Color.WHITE);
 			ok.setMnemonic(KeyEvent.VK_ENTER); 
 			getRootPane().setDefaultButton(ok); 
 			//ok.setMnemonic(KeyEvent.VK_ENTER);
@@ -226,7 +228,7 @@ public class authentification extends JFrame {
 		                validerActionPerformed(evt);
 				}
 			});
-			ok.setBounds(168, 198, 116, 25);
+			ok.setBounds(291, 180, 116, 25);
 		}
 		return ok;
 	}
@@ -240,29 +242,15 @@ public class authentification extends JFrame {
 	private static JComboBox getReg() {
 		if (reg == null) {
 			reg = new JComboBox();
-			reg.setBounds(155, 149, 232, 22);
+			reg.setBounds(101, 151, 232, 22);
 		}
 		return reg;
 	}
 	private JLabel getLabel() {
 		if (label == null) {
 			label = new JLabel("Région : ");
-			label.setBounds(53, 149, 104, 16);
+			label.setBounds(30, 152, 104, 16);
 		}
 		return label;
-	}
-	private JButton getQuitter() {
-		if (quitter == null) {
-			quitter = new JButton("Quitter");
-			quitter.setBackground(new Color(255, 255, 255));
-			quitter.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					System.exit(0);
-				}
-			});
-			quitter.setMnemonic(KeyEvent.VK_ENTER);
-			quitter.setBounds(303, 198, 116, 25);
-		}
-		return quitter;
 	}
 }
