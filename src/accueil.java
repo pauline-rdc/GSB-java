@@ -10,6 +10,7 @@ import javax.swing.JButton;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JTextPane;
 
 import java.awt.Font;
@@ -21,7 +22,6 @@ public class accueil extends authentification {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JButton compteRendu;
-	private static JButton visiteurs;
 	private JButton praticiens;
 	private JButton medicaments;
 	private JButton deconnect;
@@ -29,6 +29,7 @@ public class accueil extends authentification {
 	private JTextField textField;
 	private JButton autreRapports;
 	private JTextField roleUser;
+	private JButton visiteur;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -55,18 +56,18 @@ public class accueil extends authentification {
 		contentPane.setLayout(null);
 		contentPane.add(getTextField_1_1());
 		contentPane.add(getCompteRendu());
-		contentPane.add(getVisiteurs());
 		contentPane.add(getPraticiens());
 		contentPane.add(getMedicaments());
 		contentPane.add(getDeconnect());
 		contentPane.add(getTxtpnGestionDesComptes());
 		contentPane.add(getTextField());
-		contentPane.add(getAutreRapports());
+		contentPane.add(getAutreRapports());	
+		contentPane.add(getVisiteur());
 		if (role.equals("Visiteur")){
-			visiteurs.setVisible(false);
+			visiteur.setVisible(false);
 			autreRapports.setVisible(false);
-		}else{
-			visiteurs.setVisible(true);
+		}else if (role.equals("Responsable")|| role.equals("Délégué")){
+			visiteur.setVisible(true);
 			autreRapports.setVisible(true);
 		}
 		System.out.println("matricule :"); 
@@ -84,19 +85,6 @@ public class accueil extends authentification {
 			compteRendu.setBounds(124, 137, 155, 25);
 		}
 		return compteRendu;
-	}
-	private JButton getVisiteurs() {
-		if (visiteurs == null) {
-			visiteurs = new JButton("Visiteurs");
-			visiteurs.setBackground(new Color(255, 255, 255));
-			visiteurs.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					new visiteur().setVisible(true); 
-				}
-			});
-			visiteurs.setBounds(292, 176, 155, 25);
-		}
-		return visiteurs;
 	}
 	private JButton getPraticiens() {
 		if (praticiens == null) {
@@ -130,8 +118,8 @@ public class accueil extends authentification {
 			deconnect.setBackground(new Color(255, 255, 255));
 			deconnect.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					role="";
-					matricule="";
+					
+					
 					new authentification().setVisible(true);
 					dispose();
 				}
@@ -168,8 +156,10 @@ public class accueil extends authentification {
 			autreRapports.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					if (role.equals("Délégué")){
+						System.out.print("| role: "+role );
 						new rapport_visite2().setVisible(true);
-					}else{
+					}else if (role.equals("Responsable")){
+						System.out.print("| role2: "+role );
 						new rapport_visite3().setVisible(true);
 					}
 					
@@ -189,5 +179,18 @@ public class accueil extends authentification {
 			roleUser.setFont(new Font("Times New Roman", Font.BOLD, 15));
 		}
 		return roleUser;
+	}
+	private JButton getVisiteur() {
+		if (visiteur == null) {
+			visiteur = new JButton("Visiteurs");
+			visiteur.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					new visiteur().setVisible(true); 
+				}
+			});
+			visiteur.setBackground(Color.WHITE);
+			visiteur.setBounds(292, 176, 155, 25);
+		}
+		return visiteur;
 	}
 }

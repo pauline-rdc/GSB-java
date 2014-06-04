@@ -62,7 +62,7 @@ public class visiteur extends accueil {
 	static ResultSetMetaData resultMeta2;
 	static ResultSet result3;
 	static ResultSetMetaData resultMeta3;
-	
+	static String visMatricule;
 	static int numSuivant;
 	static int numPrecedent;
 	static int idVis;
@@ -72,6 +72,8 @@ public class visiteur extends accueil {
 	static String regionLibel="";
 	static String cherche;
 	static String matric;
+	static String numPrec="";
+	static String numSuiv="";
 	private JTextArea textArea_7;
 	private static JTextField sect;
 	private JTextArea textArea_8;
@@ -239,15 +241,16 @@ public class visiteur extends accueil {
 						 resultMeta2 = (ResultSetMetaData) result2.getMetaData();
 						 while(result2.next()){	
 							 if (valid==true){
-								 numPrecedent=result2.getInt("id");
+								// numPrecedent=result2.getInt("id");
+								 numPrec = result2.getString("VIS_MATRICULE");
 								 valid=false;
 							 }
-							 if(result2.getInt("id") == idVis){
+							 if(result2.getString("VIS_MATRICULE").equals(visMatricule)){
 								 valid=true;
 							 }
 						 }
-						if (numPrecedent!=0){
-							idVis=numPrecedent;
+						if (numPrec.isEmpty()==false){
+							visMatricule=numPrec;
 						}
 						PrecSuivantActionPerformed(e);
 						
@@ -272,17 +275,20 @@ public class visiteur extends accueil {
 						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
 						 result2 = state.executeQuery("SELECT * FROM visiteur Order by VIS_NOM");
 						 resultMeta2 = (ResultSetMetaData) result2.getMetaData();
+						 
 						 while(result2.next()){	
 							 if (valid==true){
-								 numSuivant=result2.getInt("id");
+								 numSuiv = result2.getString("VIS_MATRICULE");
 								 valid=false;
 							 }
-							 if(result2.getInt("id") == idVis){
+							 if(result2.getString("VIS_MATRICULE").equals(visMatricule)){
 								 valid=true;
 							 }
 						 }
-						if (numSuivant!=0){
-							idVis=numSuivant;
+						 System.out.println("numSuiv" + numSuiv);
+						if (numSuiv.isEmpty()==false){
+							 System.out.println("numSuiv2" + numSuiv);
+							visMatricule=numSuiv;
 						}
 						PrecSuivantActionPerformed(arg0);
 						
@@ -408,7 +414,7 @@ public class visiteur extends accueil {
 		try{
 			ConnexionBDD conn = new ConnexionBDD();
 			Statement state = (Statement) conn.execBDD().createStatement();
-			result = state.executeQuery("SELECT * FROM "+table +" where id='"+idVis+"'");
+			result = state.executeQuery("SELECT * FROM "+table +" where VIS_MATRICULE='"+visMatricule+"'");
 			resultMeta = (ResultSetMetaData) result.getMetaData();
 			
 			
@@ -467,7 +473,8 @@ public class visiteur extends accueil {
 			
 			
 			while(result.next()){						
-				 idVis= result.getInt("id");
+				// idVis= result.getInt("id");
+				 visMatricule = result.getString("VIS_MATRICULE");
 				  getNom().setText(result.getString("Vis_NOM"));
 				  getPrenom().setText(result.getString("Vis_PRENOM"));
 				  getAdresse().setText(result.getString("Vis_ADRESSE"));

@@ -54,6 +54,7 @@ public class authentification extends JFrame {
 	private JLabel label;
 	private JButton quitter;
 	static boolean valideAuth;
+	private JButton btnAide;
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -96,6 +97,7 @@ public class authentification extends JFrame {
 		contentPane.add(getPass());
 		contentPane.add(getReg());
 		contentPane.add(getLabel());
+		contentPane.add(getBtnAide());
 	}
 	
 	private void validerActionPerformed(java.awt.event.ActionEvent evt) {
@@ -120,9 +122,6 @@ public class authentification extends JFrame {
 			String date = null;
 			
 			while (result.next()){
-				
-				role=result.getString("TRA_ROLE");		//variable globale: profil de l'User
-				dateEmbauche=result.getString("JJMMAA");	//variable globale: date d'embauche de l'User
 				
 				date=result.getString("JJMMAA");
 				String annee= date.substring(0,4);
@@ -152,6 +151,8 @@ public class authentification extends JFrame {
 				
 				if(motDePasse.equalsIgnoreCase(passwordd)) // vérification du mot de passe
 				{	valideAuth=true;
+					role=result.getString("TRA_ROLE");		//variable globale: profil de l'User
+					dateEmbauche=result.getString("JJMMAA");	//variable globale: date d'embauche de l'User
 					new accueil().setVisible(true);
 					this.setVisible(false);
 				}else if (valideAuth !=true){
@@ -274,5 +275,18 @@ public class authentification extends JFrame {
 			quitter.setBounds(303, 198, 116, 25);
 		}
 		return quitter;
+	}
+	private JButton getBtnAide() {
+		if (btnAide == null) {
+			btnAide = new JButton("Aide");
+			btnAide.setBackground(Color.WHITE);
+			btnAide.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					new aide().setVisible(true);
+				}
+			});
+			btnAide.setBounds(36, 198, 97, 25);
+		}
+		return btnAide;
 	}
 }
