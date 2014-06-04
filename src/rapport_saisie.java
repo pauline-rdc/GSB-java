@@ -311,10 +311,12 @@ public class rapport_saisie extends accueil {
 		
 		// Numéro du rapport saisit
 		Statement st =  (Statement) conn.execBDD().createStatement(); 
-		ResultSet rs = st.executeQuery("SELECT COUNT(*) as count FROM rapport_visite");
-		rs.next();
-		int number = rs.getInt(1);
-		numRap = number+1;
+		ResultSet rs = st.executeQuery("SELECT RAP_NUM FROM rapport_visite order by RAP_NUM DESC limit 1");
+		while(rs.next()){
+			int number = rs.getInt("RAP_NUM");
+			numRap = number+1;
+		}
+		System.out.println(numRap);
 		
 		//Numéro du praticien
 		tab = connexion.selectionner.displayString(praticien.getSelectedItem());
@@ -350,6 +352,7 @@ public class rapport_saisie extends accueil {
 			if (validate==true){	//Si aucun problème rencontré lors des vérifications: on enregistre le rapport et les échantillons
 				ConnexionBDD conn = new ConnexionBDD();// Connexion
 				//insertion des informations du rapport
+				System.out.println(matricule+"| "+ numRap );
 	           	Statement state1 = (Statement) conn.execBDD().createStatement();
 				result1 = state1.executeUpdate("INSERT INTO rapport_visite  VALUES('"+matricule+"','"+numRap+"','"+ numPra +"','"
 						+ dateRap+"','"+ bilan.getText()+"','"+ motif_combo+"')");

@@ -30,7 +30,7 @@ import javax.swing.JTextPane;
 
 import java.awt.SystemColor;
 
-public class rapport_visite extends accueil {
+public class rapport_visite3 extends accueil {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -48,10 +48,14 @@ public class rapport_visite extends accueil {
 	private JTextArea txtrOffreDchantillons;
 	private JTextField motif;
 	private JTextField praticien;
-
+	
 	static Connection conn;
 	static ResultSet result;
 	static ResultSetMetaData resultMeta;
+	static ResultSet requete;
+	static ResultSetMetaData requeteMeta;
+	static ResultSet requete2;
+	static ResultSetMetaData requete2Meta;
 	static ResultSet result1;
 	static ResultSetMetaData resultM;
 	static ResultSet result2;
@@ -67,6 +71,8 @@ public class rapport_visite extends accueil {
 	static int numSuivant=0;
 	static int numPrecedent=0;
 	static int rapNum;
+	static String secteurUser="";
+	static String laboUser="";
 	
 	private static JComboBox<String> chercheNom;
 	private JButton ok;
@@ -88,7 +94,7 @@ public class rapport_visite extends accueil {
 	/**
 	 * Create the frame.
 	 */
-	public rapport_visite() {
+	public rapport_visite3() {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 520, 444);
 		contentPane = new JPanel();
@@ -126,15 +132,36 @@ public class rapport_visite extends accueil {
 					table = "rapport_visite";
 					table2="praticien";
 					table3="offrir";
-					getChercheNom().removeAllItems();
-					ConnexionBDD conn = new ConnexionBDD();
-					Statement state = (Statement) conn.execBDD().createStatement();
 					
-				    result = state.executeQuery("SELECT * FROM  rapport_visite WHERE VIS_MATRICULE='"+matricule+"'");
+					getChercheNom().removeAllItems();
+					
+					ConnexionBDD conn = new ConnexionBDD();
+					//recherche le secteur du User
+					Statement state = (Statement) conn.execBDD().createStatement();
+					requete = state.executeQuery("SELECT SEC_CODE from region where REG_CODE=( "
+										+"SELECT REG_CODE from travailler where VIS_MATRICULE='"+ matricule +"'  and  JJMMAA='"+ dateEmbauche +"')");
+					requeteMeta=(ResultSetMetaData)requete.getMetaData();
+					while(requete.next()){
+						secteurUser=requete.getString("SEC_CODE");
+					}
+					
+					//recherche le labo du User
+					requete2= state.executeQuery("SELECT LAB_CODE from visiteur where VIS_MATRICULE='"+ matricule +"'");
+					requete2Meta=(ResultSetMetaData)requete2.getMetaData();
+					while(requete2.next()){
+						laboUser=requete2.getString("LAB_CODE");
+					}
+					
+					//recherche tous les rapports n'appartenant pas au User, des visiteurs étant dans le même secteur et le même labo 
+				    result = state.executeQuery("SELECT RAP_NUM as numRapport,SUBSTRING(RAP_DATE,1,10) as dateRapport from rapport_visite "
+				    		+ "where VIS_MATRICULE<>'"+ matricule +"' and VIS_MATRICULE in ("
+									+"SELECT VIS_MATRICULE from travailler where REG_CODE in ("
+									+"SELECT REG_CODE from region where SEC_CODE='"+ secteurUser +"')) and VIS_MATRICULE in ("
+									+"SELECT VIS_MATRICULE from visiteur where LAB_CODE='"+  laboUser+"')");
 				    resultMeta = (ResultSetMetaData) result.getMetaData();
 				    while(result.next()){
-				    	getChercheNom().addItem(result.getString("RAP_NUM"));
-				    	rapNum=result.getInt("RAP_NUM");
+				    	getChercheNom().addItem(result.getString("numRapport"));
+				    	rapNum=result.getInt("numRapport");
 				    }
 		            result.close();
 		       	  	state.close();					
@@ -150,7 +177,7 @@ public class rapport_visite extends accueil {
 			titre.setForeground(Color.WHITE);
 			titre.setBackground(new Color(100, 149, 237));
 			titre.setFont(new Font("Tahoma", Font.BOLD, 16));
-			titre.setText("Mes Rapports de Visite");
+			titre.setText("Rapports de visite");
 			titre.setBounds(0, 0, 533, 58);
 			titre.setColumns(10);
 			titre.setEditable(false);
@@ -188,6 +215,7 @@ public class rapport_visite extends accueil {
 					setVisible(false);
 				}
 			});
+			btnNew.setVisible(false);
 			btnNew.setBounds(248, 354, 97, 25);
 		}
 		return btnNew;
@@ -322,6 +350,14 @@ public class rapport_visite extends accueil {
 								  getBilan2().setText(result1.getString("RAP_BILAN"));
 								  getMotif().setText(result1.getString("RAP_MOTIF"));
 								  
+								  Statement state4 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+						           ResultSet result4 = state4.executeQuery("SELECT * FROM visiteur where VIS_MATRICULE='"+ result1.getString("VIS_MATRICULE") +"'");
+						           ResultSetMetaData resultM4 = (ResultSetMetaData) result4.getMetaData();
+						           while(result4.next()){	
+						        	   titre.setText("Rapports de visite de "+result4.getString("VIS_NOM")+" "+result4.getString("Vis_PRENOM"));
+						           }
+								  
+								  
 								  Statement state2 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
 						           result2 = state2.executeQuery("SELECT * FROM "+table2 +" where PRA_NUM='"+ result1.getString("PRA_NUM") +"'");
 						           resultM2 = (ResultSetMetaData) result2.getMetaData();
@@ -392,7 +428,11 @@ public class rapport_visite extends accueil {
 						ConnexionBDD conn = new ConnexionBDD();
 						Statement state;
 						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
-						 result2 = state.executeQuery("SELECT * FROM rapport_visite where VIS_MATRICULE ='"+ matricule +"' Order by RAP_NUM DESC");
+						result2=state.executeQuery("SELECT * from rapport_visite "
+				    		+ "where VIS_MATRICULE<>'"+ matricule +"' and VIS_MATRICULE in ("
+									+"SELECT VIS_MATRICULE from travailler where REG_CODE in ("
+									+"SELECT REG_CODE from region where SEC_CODE='"+ secteurUser +"')) and VIS_MATRICULE in ("
+									+"SELECT VIS_MATRICULE from visiteur where LAB_CODE='"+  laboUser+"') order by RAP_NUM DESC");
 						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
 						 while(result2.next()){	
 							 if (valid==true){
@@ -426,7 +466,11 @@ public class rapport_visite extends accueil {
 						ConnexionBDD conn = new ConnexionBDD();
 						Statement state;
 						state = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
-						 result2 = state.executeQuery("SELECT * FROM rapport_visite where VIS_MATRICULE='"+ matricule+"' Order by RAP_NUM");
+						result2=state.executeQuery("SELECT * from rapport_visite "
+				    		+ "where VIS_MATRICULE<>'"+ matricule +"' and VIS_MATRICULE in ("
+									+"SELECT VIS_MATRICULE from travailler where REG_CODE in ("
+									+"SELECT REG_CODE from region where SEC_CODE='"+ secteurUser +"')) and VIS_MATRICULE in ("
+									+"SELECT VIS_MATRICULE from visiteur where LAB_CODE='"+  laboUser+"') order by RAP_NUM ");
 						 ResultSetMetaData resultMeta2 = (ResultSetMetaData) result2.getMetaData();
 						 System.out.println(" | Avant le while :" + rapNum);
 						 while(result2.next()){	
@@ -476,6 +520,12 @@ public class rapport_visite extends accueil {
 			        	   getPraticien().setText(result5.getString("PRA_NOM"));
 			           }
 			           
+			           Statement stat = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
+			           requete = stat.executeQuery("SELECT * FROM visiteur where VIS_MATRICULE='"+ result4.getString("VIS_MATRICULE") +"'");
+			           ResultSetMetaData requeteMeta = (ResultSetMetaData) requete.getMetaData();
+			           while(requete.next()){	
+			        	   titre.setText("Rapports de visite de "+requete.getString("VIS_NOM")+" "+requete.getString("Vis_PRENOM"));
+			           }
 			           Statement state3 = (Statement) ((ConnexionBDD) conn).execBDD().createStatement();
 			           result3 = state3.executeQuery("SELECT * FROM "+table3 +" where RAP_NUM='"+ result4.getString("RAP_NUM") +"'");
 			           resultM3 = (ResultSetMetaData) result3.getMetaData();

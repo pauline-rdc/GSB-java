@@ -34,6 +34,7 @@ public class authentification extends JFrame {
 	public static String matricule;
 	public static int numPraticien;
 	public static String role;
+	public static String dateEmbauche;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -52,7 +53,7 @@ public class authentification extends JFrame {
 	private static JComboBox reg;
 	private JLabel label;
 	private JButton quitter;
-
+	static boolean valideAuth;
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -103,7 +104,7 @@ public class authentification extends JFrame {
 		String passwordd = pass.getText();
         String[] tab = connexion.selectionner.displayString(reg.getSelectedItem());
         String regionCode = tab[0];
- 
+        valideAuth=false;
 		try {
 		ConnexionBDD conn = new ConnexionBDD();
 		Statement stat = (Statement) conn.execBDD().createStatement();
@@ -113,17 +114,23 @@ public class authentification extends JFrame {
 		if(resul.next())	
 		{	matricule= resul.getString("VIS_MATRICULE");
 			System.out.print("| matricule: "+matricule );
+		
 			ResultSet result = stat.executeQuery("SELECT * FROM travailler WHERE VIS_MATRICULE='"+matricule +"' and REG_CODE='"+ regionCode+"'");
 		    resultMeta = (ResultSetMetaData) result.getMetaData();
 			String date = null;
-			if (result.next()){
-				role=result.getString("TRA_ROLE");
+			
+			while (result.next()){
+				
+				role=result.getString("TRA_ROLE");		//variable globale: profil de l'User
+				dateEmbauche=result.getString("JJMMAA");	//variable globale: date d'embauche de l'User
+				
 				date=result.getString("JJMMAA");
 				String annee= date.substring(0,4);
 				String mois= date.substring(5,7);
 				String jour= date.substring(8,10);
-				System.out.print("| "+ role);
-				System.out.print(date +" "+ annee+" "+ mois+" "+ jour);
+				
+				System.out.print("| role: "+ role);
+				System.out.print("Date embauche" + date +" "+ annee+" "+ mois+" "+ jour);
 				
 				if (mois.equals("01"))	{mois = "-jan-";}
 				if (mois.equals("02"))	{mois = "-feb-";}
@@ -144,18 +151,21 @@ public class authentification extends JFrame {
 				
 				
 				if(motDePasse.equalsIgnoreCase(passwordd)) // vérification du mot de passe
-				{	new accueil().setVisible(true);
+				{	valideAuth=true;
+					new accueil().setVisible(true);
 					this.setVisible(false);
-				}
-				else {
-					JOptionPane.showMessageDialog(null,"Mot de passe ou région délectionnée incorrect ! ","Error",1);
+				}else if (valideAuth !=true){
+					valideAuth=false;
 				}
 			}
-				
+			if(valideAuth==false){
+				JOptionPane.showMessageDialog(null,"Mot de passe ou région sélectionnée incorrect ! ","Error",1);
 			}
-			else {
+			
+		}else {
 				JOptionPane.showMessageDialog(null,"Login incorrect ! ","Error",1);
 			}
+		
 		}
 		catch (SQLException e) {
 			System.out.println(e.getMessage());

@@ -27,6 +27,8 @@ public class accueil extends authentification {
 	private JButton deconnect;
 	private JTextPane txtpnGestionDesComptes;
 	private JTextField textField;
+	private JButton autreRapports;
+	private JTextField roleUser;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -45,12 +47,13 @@ public class accueil extends authentification {
 	public accueil() {
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 528, 347);
+		setBounds(100, 100, 477, 297);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		contentPane.add(getTextField_1_1());
 		contentPane.add(getCompteRendu());
 		contentPane.add(getVisiteurs());
 		contentPane.add(getPraticiens());
@@ -58,24 +61,27 @@ public class accueil extends authentification {
 		contentPane.add(getDeconnect());
 		contentPane.add(getTxtpnGestionDesComptes());
 		contentPane.add(getTextField());
+		contentPane.add(getAutreRapports());
 		if (role.equals("Visiteur")){
 			visiteurs.setVisible(false);
+			autreRapports.setVisible(false);
 		}else{
 			visiteurs.setVisible(true);
+			autreRapports.setVisible(true);
 		}
 		System.out.println("matricule :"); 
    	 System.out.println(matricule); 
 	}
 	private JButton getCompteRendu() {
 		if (compteRendu == null) {
-			compteRendu = new JButton("Comptes Rendus");
+			compteRendu = new JButton("Rapports de visites");
 			compteRendu.setBackground(new Color(255, 255, 255));
 			compteRendu.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					new rapport_visite().setVisible(true);
 				}
 			});
-			compteRendu.setBounds(228, 97, 155, 25);
+			compteRendu.setBounds(124, 137, 155, 25);
 		}
 		return compteRendu;
 	}
@@ -88,7 +94,7 @@ public class accueil extends authentification {
 					new visiteur().setVisible(true); 
 				}
 			});
-			visiteurs.setBounds(228, 212, 155, 25);
+			visiteurs.setBounds(292, 176, 155, 25);
 		}
 		return visiteurs;
 	}
@@ -101,7 +107,7 @@ public class accueil extends authentification {
 					new praticiens().setVisible(true);
 				}
 			});
-			praticiens.setBounds(228, 135, 155, 25);
+			praticiens.setBounds(292, 99, 155, 25);
 		}
 		return praticiens;
 	}
@@ -114,7 +120,7 @@ public class accueil extends authentification {
 					new medicaments().setVisible(true);
 				}
 			});
-			medicaments.setBounds(228, 173, 155, 25);
+			medicaments.setBounds(292, 137, 155, 25);
 		}
 		return medicaments;
 	}
@@ -130,7 +136,7 @@ public class accueil extends authentification {
 					dispose();
 				}
 			});
-			deconnect.setBounds(228, 250, 155, 25);
+			deconnect.setBounds(292, 214, 155, 25);
 		}
 		return deconnect;
 	}
@@ -141,7 +147,7 @@ public class accueil extends authentification {
 			txtpnGestionDesComptes.setForeground(new Color(255, 255, 255));
 			txtpnGestionDesComptes.setBackground(new Color(100, 149, 237));
 			txtpnGestionDesComptes.setText("Gestion des comptes rendus");
-			txtpnGestionDesComptes.setBounds(55, 0, 455, 62);
+			txtpnGestionDesComptes.setBounds(98, 0, 412, 62);
 			txtpnGestionDesComptes.setEditable(false);
 		}
 		return txtpnGestionDesComptes;
@@ -150,10 +156,38 @@ public class accueil extends authentification {
 		if (textField == null) {
 			textField = new JTextField();
 			textField.setBackground(new Color(100, 149, 237));
-			textField.setBounds(0, -4, 56, 306);
+			textField.setBounds(0, 0, 99, 250);
 			textField.setColumns(10);
 			textField.setEditable(false);
 		}
 		return textField;
+	}
+	private JButton getAutreRapports() {
+		if (autreRapports == null) {
+			autreRapports = new JButton("Autres rapports");
+			autreRapports.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					if (role.equals("Délégué")){
+						new rapport_visite2().setVisible(true);
+					}else{
+						new rapport_visite3().setVisible(true);
+					}
+					
+				}
+			});
+			autreRapports.setBackground(Color.WHITE);
+			autreRapports.setBounds(124, 175, 155, 25);
+		}
+		return autreRapports;
+	}
+	private JTextField getTextField_1_1() {
+		if (roleUser == null) {
+			roleUser = new JTextField(role);
+			roleUser.setBounds(124, 86, 155, 38);
+			roleUser.setColumns(20);
+			roleUser.setEditable(false);
+			roleUser.setFont(new Font("Times New Roman", Font.BOLD, 15));
+		}
+		return roleUser;
 	}
 }
